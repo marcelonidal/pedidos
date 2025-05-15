@@ -3,10 +3,15 @@ package br.com.fiap.pedido.infra.service.unit;
 import br.com.fiap.pedido.app.dto.ItemPedidoDTO;
 import br.com.fiap.pedido.app.dto.PedidoRequestDTO;
 import br.com.fiap.pedido.app.dto.PedidoResponseDTO;
+import br.com.fiap.pedido.app.event.PedidoEventPublisher;
 import br.com.fiap.pedido.app.mapper.PedidoMapper;
 import br.com.fiap.pedido.core.domain.exception.PedidoNaoEncontradoException;
 import br.com.fiap.pedido.core.domain.model.Pedido;
 import br.com.fiap.pedido.core.domain.model.PedidoStatus;
+import br.com.fiap.pedido.infra.client.ClienteClient;
+import br.com.fiap.pedido.infra.client.EstoqueClient;
+import br.com.fiap.pedido.infra.client.PagamentoClient;
+import br.com.fiap.pedido.infra.client.ProdutoClient;
 import br.com.fiap.pedido.infra.repository.postgres.PedidoRepository;
 import br.com.fiap.pedido.infra.service.PedidoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +36,21 @@ class PedidoServiceImplTest {
     void setUp() {
         repository = mock(PedidoRepository.class);
         mapper = mock(PedidoMapper.class);
-        service = new PedidoServiceImpl(repository, mapper);
+        ClienteClient clienteClient = mock(ClienteClient.class);
+        ProdutoClient produtoClient = mock(ProdutoClient.class);
+        EstoqueClient estoqueClient = mock(EstoqueClient.class);
+        PagamentoClient pagamentoClient = mock(PagamentoClient.class);
+        PedidoEventPublisher eventPublisher = mock(PedidoEventPublisher.class);
+
+        service = new PedidoServiceImpl(
+                repository,
+                mapper,
+                clienteClient,
+                produtoClient,
+                estoqueClient,
+                pagamentoClient,
+                eventPublisher
+        );
     }
 
     @Test

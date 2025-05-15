@@ -37,35 +37,43 @@
 	<!-- Dependencias -->
 	<dependencies>
 		<!-- Spring Boot Core: fornece logging, autoconfiguração, lifecycle -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
+		<!-- Processador de configs do Spring (auto-complete no IDE) -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-configuration-processor -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Web: inclui Spring MVC + Jackson + Tomcat embutido -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
 		<!-- MongoDB: abstrações para acesso a Mongo com Spring Data -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 
 		<!-- Spring Data JPA: acesso a bancos relacionais com Hibernate -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
 		<!-- Driver PostgreSQL: conecta com banco relacional PostgreSQL -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -73,14 +81,14 @@
 		</dependency>
 
 		<!-- Bean Validation (JSR 380) via Hibernate Validator -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
 		<!-- Lombok: reduz boilerplate em POJOs, construtores, builders -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -89,7 +97,7 @@
 		</dependency>
 
 		<!-- MapStruct: mapeamento automático entre entidades e DTOs -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
+		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
@@ -97,7 +105,7 @@
 		</dependency>
 
 		<!-- Processador do MapStruct para gerar os mappers na compilação -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-processor</artifactId>
@@ -106,7 +114,7 @@
 		</dependency>
 
 		<!-- Swagger/OpenAPI 3: gera documentação interativa da API REST -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+		<!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -114,26 +122,32 @@
 		</dependency>
 
 		<!-- Spring AMQP: suporte ao RabbitMQ com listeners e templates -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
+		<!-- Flyway: controle de versao de scripts SQL para evolucao do schema -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>11.8.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+			<version>11.8.2</version>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Testes unitários e integrados: JUnit 5, Mockito, Spring Test -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<!-- Processador de configs do Spring (auto-complete no IDE) -->
-		<!-- 🔗 https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-configuration-processor -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
@@ -163,7 +177,7 @@
 			</plugin>
 
 			<!-- Jacoco: gera relatorio de cobertura de testes automatizados -->
-			<!-- 🔗 https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+			<!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -181,6 +195,28 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<!-- Jacoco: valida cobertura minima por pacote -->
+						<id>jacoco-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>PACKAGE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.00</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+
 				</executions>
 			</plugin>
 
@@ -198,7 +234,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
+				<version>0.8.13</version>
 			</plugin>
 		</plugins>
 	</reporting>
