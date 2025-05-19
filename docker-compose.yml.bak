@@ -49,7 +49,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pedidos:5432/pedidos
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 
+      SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATA_MONGODB_URI: mongodb://mongo-pedidos:27017/pedidos
       SPRING_RABBITMQ_HOST: rabbitmq-pedidos
 
