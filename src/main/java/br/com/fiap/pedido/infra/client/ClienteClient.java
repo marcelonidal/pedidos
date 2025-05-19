@@ -1,6 +1,7 @@
 package br.com.fiap.pedido.infra.client;
 
 import br.com.fiap.pedido.core.domain.exception.ClienteNaoEncontradoException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -13,6 +14,7 @@ public class ClienteClient {
 
     private final RestTemplate restTemplate;
 
+    @Autowired
     public ClienteClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }

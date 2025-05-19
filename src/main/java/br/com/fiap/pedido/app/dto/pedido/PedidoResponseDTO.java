@@ -1,4 +1,6 @@
-package br.com.fiap.pedido.app.dto;
+package br.com.fiap.pedido.app.dto.pedido;
+
+import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,5 +13,6 @@ public record PedidoResponseDTO(
         LocalDateTime dataCriacao,
         String status,
         BigDecimal valorTotal,
-        List<ItemPedidoDTO> itens
+        List<ItemPedidoDTO> itens,
+        PagamentoDTO pagamento
 ) {}

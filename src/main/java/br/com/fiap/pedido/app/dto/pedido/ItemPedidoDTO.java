@@ -1,4 +1,4 @@
-package br.com.fiap.pedido.app.dto;
+package br.com.fiap.pedido.app.dto.pedido;
 
 import java.math.BigDecimal;
 import java.util.UUID;

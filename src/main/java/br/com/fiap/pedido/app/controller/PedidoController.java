@@ -1,13 +1,13 @@
 package br.com.fiap.pedido.app.controller;
 
-import br.com.fiap.pedido.app.dto.AtualizacaoStatusPedidoDTO;
-import br.com.fiap.pedido.app.dto.PedidoRequestDTO;
-import br.com.fiap.pedido.app.dto.PedidoResponseDTO;
+import br.com.fiap.pedido.app.dto.pedido.PedidoRequestDTO;
+import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
 import br.com.fiap.pedido.core.domain.usecase.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Pedidos Internos", description = "API interna do pedido-service usada por serviços internos para criação e consulta de pedidos")
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/internal/api/v1/")
 @RequiredArgsConstructor
 public class PedidoController {
 
@@ -67,12 +68,22 @@ public class PedidoController {
     @ApiResponse(responseCode = "204", description = "Status atualizado com sucesso")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     @ApiResponse(responseCode = "400", description = "Status inválido")
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Void> atualizarStatus(
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> atualizarPedido(
             @PathVariable UUID id,
-            @RequestBody @Valid AtualizacaoStatusPedidoDTO dto) {
+            @RequestBody @Valid PedidoResponseDTO dto) {
 
-        service.atualizarStatus(id, dto.status());
+        PedidoResponseDTO dtoComIdNova = new PedidoResponseDTO(
+                id,
+                dto.clienteId(),
+                dto.dataCriacao(),
+                dto.status(),
+                dto.valorTotal(),
+                dto.itens(),
+                dto.pagamento()
+        );
+
+        service.atualizarPedido(dtoComIdNova);
         return ResponseEntity.noContent().build();
     }
 

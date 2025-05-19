@@ -1,8 +1,8 @@
-package br.com.fiap.pedido.app.dto;
+package br.com.fiap.pedido.app.dto.estoque;
 
 import java.util.UUID;
 
-public record ReservaEstoqueRequestDTO(
+public record EstoqueRequestDTO(
         UUID produtoId,
         int quantidade
 ) {}

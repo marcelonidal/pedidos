@@ -1,7 +1,8 @@
 package br.com.fiap.pedido.core.domain.usecase;
 
-import br.com.fiap.pedido.app.dto.PedidoRequestDTO;
-import br.com.fiap.pedido.app.dto.PedidoResponseDTO;
+import br.com.fiap.pedido.app.dto.pedido.PedidoRequestDTO;
+import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
+import br.com.fiap.pedido.app.dto.pedido.PedidoResponseMongoDTO;
 import br.com.fiap.pedido.core.domain.model.PedidoStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ public interface PedidoService {
 
     Page<PedidoResponseDTO> listarPaginado(Pageable pageable);
 
-    void atualizarStatus(UUID id, PedidoStatus novoStatus);
+    void atualizarPedido(PedidoResponseDTO pedidoResponseDTO);
 
     void cancelarPedido(UUID id);
 }

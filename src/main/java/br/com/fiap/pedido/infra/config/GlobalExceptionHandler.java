@@ -1,6 +1,6 @@
 package br.com.fiap.pedido.infra.config;
 
-import br.com.fiap.pedido.app.dto.ErroPadraoDTO;
+import br.com.fiap.pedido.app.dto.shared.ErroPadraoDTO;
 import br.com.fiap.pedido.core.domain.exception.PedidoNaoEncontradoException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         return new ErroPadraoDTO(
                 UUID.randomUUID(),
                 LocalDateTime.now(),
-                "Pedido não encontrado",
+                "Pedido nao encontrado",
                 ex.getMessage()
         );
     }
@@ -31,12 +31,12 @@ public class GlobalExceptionHandler {
         String detalhe = ex.getBindingResult().getFieldErrors().stream()
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .findFirst()
-                .orElse("Requisição inválida");
+                .orElse("Requisicao invalida");
 
         return new ErroPadraoDTO(
                 UUID.randomUUID(),
                 LocalDateTime.now(),
-                "Erro de validação",
+                "Erro de validacao",
                 detalhe
         );
     }
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
         return new ErroPadraoDTO(
                 UUID.randomUUID(),
                 LocalDateTime.now(),
-                "Corpo da requisição inválido",
+                "Corpo da requisicao invalido",
                 ex.getMostSpecificCause().getMessage()
         );
     }
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
         return new ErroPadraoDTO(
                 UUID.randomUUID(),
                 LocalDateTime.now(),
-                "Violação de regra de negócio",
+                "Violacao de regra de negocio",
                 ex.getMessage()
         );
     }

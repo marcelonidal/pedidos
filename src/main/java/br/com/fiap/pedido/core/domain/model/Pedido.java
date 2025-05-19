@@ -29,4 +29,5 @@ public class Pedido {
     private BigDecimal valorTotal;
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itens;
+    private UUID idPagamento;
 }

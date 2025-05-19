@@ -1,7 +1,8 @@
 package br.com.fiap.pedido.infra.client;
 
-import br.com.fiap.pedido.app.dto.ItemPedidoDTO;
+import br.com.fiap.pedido.app.dto.pedido.ItemPedidoDTO;
 import br.com.fiap.pedido.core.domain.exception.ProdutoNaoEncontradoException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -15,6 +16,7 @@ public class ProdutoClient {
 
     private final RestTemplate restTemplate;
 
+    @Autowired
     public ProdutoClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }

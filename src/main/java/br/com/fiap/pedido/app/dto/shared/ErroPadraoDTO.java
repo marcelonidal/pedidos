@@ -1,4 +1,4 @@
-package br.com.fiap.pedido.app.dto;
+package br.com.fiap.pedido.app.dto.shared;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -19,6 +19,42 @@ Integra com PostgreSQL para persistência estruturada, MongoDB para histórico e
 - Docker/Docker Compose
 
 ---
+
+## Arquitetura
+
+![Fluxo do Pedido](docs/fluxo_pedido_completo_com_legenda.png)
+
+Este microserviço segue uma arquitetura limpa e orientada a eventos, com separação clara de responsabilidades entre criação, consulta e persistência.
+
+### Fluxo completo:
+1. O **`PedidoReceiverController`** atua como porta de entrada (gateway), recebendo as requisições REST (POST para criar, GET para consultar).
+2. Ele repassa a chamada para o **`PedidoOrquestradorService`**, que orquestra o fluxo completo.
+3. No caso de criação:
+    - Chama o `pedido-service` via client interno (`PedidoClient`) para gravar o pedido no PostgreSQL.
+    - O `pedido-service`, por sua vez, valida cliente/produto, atualiza o estoque, salva o pedido e publica o evento `pedido.criado` no RabbitMQ.
+4. O **`PedidoConsumer`** escuta a fila `pedido.criado` e, ao receber o evento, grava o objeto no MongoDB com status inicial `AGUARDANDO`.
+5. Para consultas (`GET /pedido/{id}`):
+    - O `PedidoReceiverController` chama o orquestrador, que acessa o `pedido-service` para buscar o pedido atualizado e o status de pagamento via `PagamentoClient`.
+    - Se houver mudança no status, o MongoDB é atualizado com o novo estado.
+
+Esse modelo permite performance, rastreabilidade e desacoplamento entre serviços.
+
+---
+
+## Documentação da API
+
+A documentação da API REST está disponível via Swagger OpenAPI:
+
+[http://localhost:8080/pedido/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- [API Pública - Gateway](http://localhost:8080/swagger-ui.html?configUrl=/v3/api-docs/publico)
+- [API Interna - Serviço Pedido](http://localhost:8080/swagger-ui.html?configUrl=/v3/api-docs/interno)
+
+Observações:<br>
+Use o seletor no topo do Swagger UI para alternar entre os grupos `publico` e `interno`.<br>
+Você pode testar todos os endpoints diretamente pela interface web.
+
+---
+
 ## Banco de Dados e Fila — Setup com Docker
 
 ### Criar rede Docker

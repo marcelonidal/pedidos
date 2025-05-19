@@ -17,6 +17,8 @@ public class RabbitConfig {
     public static final String PEDIDO_EXCHANGE = "pedido.exchange";
     public static final String PEDIDO_CRIADO_QUEUE = "pedido.criado";
     public static final String PEDIDO_CRIADO_ROUTING_KEY = "pedido.criado";
+    public static final String PEDIDO_ATUALIZADO_QUEUE = "pedido.atualizado";
+    public static final String PEDIDO_ATUALIZADO_ROUTING_KEY = "pedido.atualizado";
 
     /** Declara a exchange do tipo topic para pedidos
      * responsavel por rotear a mensagem para a fila correta */
@@ -38,5 +40,19 @@ public class RabbitConfig {
     public Binding pedidoCriadoBinding(Queue pedidoCriadoQueue, TopicExchange pedidoExchange) {
         return BindingBuilder.bind(pedidoCriadoQueue).to(pedidoExchange).with(PEDIDO_CRIADO_ROUTING_KEY);
     }
+
+    @Bean
+    public Queue pedidoAtualizadoQueue() {
+        return new Queue(PEDIDO_ATUALIZADO_QUEUE, true);
+    }
+
+    @Bean
+    public Binding pedidoAtualizadoBinding(Queue pedidoAtualizadoQueue, TopicExchange pedidoExchange) {
+        return BindingBuilder
+                .bind(pedidoAtualizadoQueue)
+                .to(pedidoExchange)
+                .with(PEDIDO_ATUALIZADO_ROUTING_KEY);
+    }
+
 
 }
