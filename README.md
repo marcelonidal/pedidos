@@ -112,43 +112,36 @@ Parar visualizar o relatório necessário abrir via real path ou script:<br>
 
 ---
 
-## Execução via Docker Compose
+## Docker
 
-Com todos os serviços prontos, você pode subir o sistema completo com:
-
-```bash
-docker-compose up --build
-```
-
-## Validar quem está na rede do docker
+### Validar quem está na rede do docker
 ```bash
 docker network inspect network-pedidos
 ```
 
-## Criar o container da aplicação
+### Criar o container da aplicação
 
 ```bash
 docker build -t pedido-service .
 ```
 
-## Executar container
+### Executar container
 
 ```bash
 docker run -p 8080:8080 --network network-pedidos pedido-service
 ```
 
-## Executar o projeto completo manualmente:
+### Executar o projeto completo manualmente:
 
 ```bash
 docker run -p 8080:8080 --name pedido-service --network network-pedidos -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-pedidos:5432/pedidos -e SPRING_DATASOURCE_USERNAME=postgres -e SPRING_DATASOURCE_PASSWORD=postgres -e SPRING_DATA_MONGODB_URI=mongodb://mongo-pedidos:27017/pedidos -e SPRING_RABBITMQ_HOST=rabbitmq-pedidos pedido-service
 ```
 
-## Executar o projeto via docker compose:
+### Executar o projeto via docker compose:
+Com todos os serviços prontos, você pode subir o sistema completo com:
 ```bash
 docker-compose up --build
 ```
-Observações:<br>
-Não pode ter os containers com o mesmo nome, ele recria tudo num único pacote.
 
 ## Parar containers
 ```bash
