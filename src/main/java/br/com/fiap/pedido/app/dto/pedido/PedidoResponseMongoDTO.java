@@ -4,6 +4,7 @@ import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 import br.com.fiap.pedido.core.domain.model.PedidoStatus;
 import br.com.fiap.pedido.core.domain.model.StatusPagamento;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,4 +18,4 @@ public record PedidoResponseMongoDTO(
         BigDecimal valorTotal,
         List<ItemPedidoDTO> itens,
         PagamentoDTO pagamento
-) {}
+) implements Serializable {}

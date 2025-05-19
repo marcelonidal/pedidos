@@ -32,3 +32,9 @@ server:
   port: 8080
   servlet:
     context-path: /pedido
+
+logging:
+  level:
+    root: OFF
+    org.springframework.web: OFF
+    br.com.fiap.pedido: OFF

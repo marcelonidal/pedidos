@@ -82,25 +82,28 @@ public class PedidoServiceImpl implements PedidoService {
 
         if (pagamento != null && pagamento.statusPagamento() != null) {
             PedidoStatus statusAtual = pedido.getStatus();
-            PedidoStatus statusPagamento = mapearStatusPagamentoParaPedido(pagamento.statusPagamento());
 
-            if (!statusAtual.equals(statusPagamento)) {
-                pedido.setStatus(statusPagamento);
+            if (statusAtual != PedidoStatus.CANCELADO && statusAtual != PedidoStatus.REPROVADO) {
+                PedidoStatus statusPagamento = mapearStatusPagamentoParaPedido(pagamento.statusPagamento());
 
-                // Se o pagamento foi confirmado e ainda nao tem data registrada, seta agora
-                if (statusPagamento == PedidoStatus.PAGO && pagamento.dataPagamento() == null) {
-                    pagamento = new PagamentoDTO(
-                            pagamento.id(),
-                            pagamento.statusPagamento(),
-                            pagamento.metodoPagamento(),
-                            LocalDateTime.now()
-                    );
+                if (!statusAtual.equals(statusPagamento)) {
+                    pedido.setStatus(statusPagamento);
+
+                    // Se o pagamento foi confirmado e ainda nao tem data registrada, seta agora
+                    if (statusPagamento == PedidoStatus.PAGO && pagamento.dataPagamento() == null) {
+                        pagamento = new PagamentoDTO(
+                                pagamento.id(),
+                                pagamento.statusPagamento(),
+                                pagamento.metodoPagamento(),
+                                LocalDateTime.now()
+                        );
+                    }
+
+                    Pedido atualizado = repository.save(pedido);
+
+                    PedidoResponseMongoDTO evento = pedidoMongoMapper.toResponse(atualizado, pagamento);
+                    eventPublisher.publicarAtualizacaoPedido(evento);
                 }
-
-                Pedido atualizado = repository.save(pedido);
-
-                PedidoResponseMongoDTO evento = pedidoMongoMapper.toResponse(atualizado, pagamento);
-                eventPublisher.publicarAtualizacaoPedido(evento);
             }
         }
 

@@ -2,6 +2,7 @@ package br.com.fiap.pedido.app.dto.pedido;
 
 import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,4 +16,4 @@ public record PedidoResponseDTO(
         BigDecimal valorTotal,
         List<ItemPedidoDTO> itens,
         PagamentoDTO pagamento
-) {}
+) implements Serializable {}

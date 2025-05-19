@@ -2,21 +2,19 @@ package br.com.fiap.pedido.app.mapper;
 
 import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 import br.com.fiap.pedido.app.dto.pedido.ItemPedidoDTO;
-import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoResponseMongoDTO;
 import br.com.fiap.pedido.core.domain.model.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface PedidoMongoMapper {
+@Component
+public class PedidoMongoMapper {
 
-    default PedidoMongo toPedidoMongo(PedidoResponseMongoDTO dto) {
+    public PedidoMongo toPedidoMongo(PedidoResponseMongoDTO dto) {
         return PedidoMongo.builder()
                 .id(UUID.randomUUID().toString())
                 .idPedido(dto.id())
@@ -29,7 +27,7 @@ public interface PedidoMongoMapper {
                 .build();
     }
 
-    default PedidoResponseMongoDTO toResponse(Pedido pedido, PagamentoDTO pagamento) {
+    public PedidoResponseMongoDTO toResponse(Pedido pedido, PagamentoDTO pagamento) {
         return new PedidoResponseMongoDTO(
                 pedido.getId(),
                 pedido.getClienteId(),
@@ -44,7 +42,7 @@ public interface PedidoMongoMapper {
     }
 
     // de DTO -> entidade
-    default ItemPedido toItem(ItemPedidoDTO dto) {
+    public ItemPedido toItem(ItemPedidoDTO dto) {
         return ItemPedido.builder()
                 .id(null)
                 .produtoId(dto.produtoId())
@@ -54,19 +52,19 @@ public interface PedidoMongoMapper {
                 .build();
     }
 
-    default List<ItemPedido> toItens(List<ItemPedidoDTO> dtoList) {
-        if (dtoList == null) return List.of();
+    public List<ItemPedido> toItens(List<ItemPedidoDTO> dtoList) {
+        if (dtoList == null) return new ArrayList<>();
         return dtoList.stream()
                 .map(this::toItem)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     // de entidade -> DTO
-    default ItemPedidoDTO toItemDTO(ItemPedido item) {
+    public ItemPedidoDTO toItemDTO(ItemPedido item) {
         return new ItemPedidoDTO(item.getProdutoId(), item.getQuantidade(), item.getPrecoUnitario());
     }
 
-    default Pagamento toPagamento(PagamentoDTO dto) {
+    public Pagamento toPagamento(PagamentoDTO dto) {
         if (dto == null) return null;
 
         return Pagamento.builder()

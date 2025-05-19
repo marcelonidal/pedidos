@@ -45,9 +45,9 @@ Esse modelo permite performance, rastreabilidade e desacoplamento entre serviço
 
 A documentação da API REST está disponível via Swagger OpenAPI:
 
-[http://localhost:8080/pedido/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- [API Pública - Gateway](http://localhost:8080/swagger-ui.html?configUrl=/v3/api-docs/publico)
-- [API Interna - Serviço Pedido](http://localhost:8080/swagger-ui.html?configUrl=/v3/api-docs/interno)
+[swagger-ui.html](http://localhost:8080/pedido/swagger-ui.html)
+- [API Pública - Gateway](http://localhost:8080/pedido/swagger-ui.html?configUrl=/v3/api-docs/publico)
+- [API Interna - Serviço Pedido](http://localhost:8080/pedido/swagger-ui.html?configUrl=/v3/api-docs/interno)
 
 Observações:<br>
 Use o seletor no topo do Swagger UI para alternar entre os grupos `publico` e `interno`.<br>
@@ -64,7 +64,7 @@ docker network create network-pedidos
 
 ### Subir PostgreSQL
 ```bash
-docker run -d --network network-pedidos -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pedidos -p 5432:5432 postgres:15
+docker run -d --name postgres-pedidos --network network-pedidos -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pedidos -p 5432:5432 postgres:15
 ```
 
 ### Subir MongoDB
@@ -79,3 +79,83 @@ docker run -d --name rabbitmq-pedidos --network network-pedidos -p 5672:5672 -p 
 Acesse o painel de administração em: http://localhost:15672
 Usuário: guest
 Senha: guest
+
+---
+
+## Execução dos Testes
+
+Este projeto possui testes unitários e de integração separados por perfis Maven. A cobertura é medida com Jacoco.
+
+### ️Testes Unitários
+
+```bash
+mvn clean test -Punit-tests
+```
+
+### Testes de Integração
+
+```bash
+mvn clean verify -Pintegration-tests
+```
+
+### Cobertura de Testes
+
+```bash
+mvn clean verify site
+```
+Observações:<br>
+Gera o relatório de cobertura em: target/site/jacoco/index.html<br>
+Parar visualizar o relatório necessário abrir via real path ou script:<br>
+- file:///C:/caminho/do/seu/projeto/pedido/target/site/jacoco/index.html
+- via bat no windows: start "" "target\site\jacoco\index.html"
+- run no arquivo abrir-relatorio.bat na raiz do projeto.
+
+---
+
+## Execução via Docker Compose
+
+Com todos os serviços prontos, você pode subir o sistema completo com:
+
+```bash
+docker-compose up --build
+```
+
+## Validar quem está na rede do docker
+```bash
+docker network inspect network-pedidos
+```
+
+## Criar o container da aplicação
+
+```bash
+docker build -t pedido-service .
+```
+
+## Executar container
+
+```bash
+docker run -p 8080:8080 --network network-pedidos pedido-service
+```
+
+## Executar o projeto completo manualmente:
+
+```bash
+docker run -p 8080:8080 --name pedido-service --network network-pedidos -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-pedidos:5432/pedidos -e SPRING_DATASOURCE_USERNAME=postgres -e SPRING_DATASOURCE_PASSWORD=postgres -e SPRING_DATA_MONGODB_URI=mongodb://mongo-pedidos:27017/pedidos -e SPRING_RABBITMQ_HOST=rabbitmq-pedidos pedido-service
+```
+
+## Executar o projeto via docker compose:
+```bash
+docker-compose up --build
+```
+Observações:<br>
+Não pode ter os containers com o mesmo nome, ele recria tudo num único pacote.
+
+## Parar containers
+```bash
+docker stop postgres-pedidos mongo-pedidos rabbitmq-pedidos
+```
+
+## Remover containers
+```bash
+docker rm postgres-pedidos mongo-pedidos rabbitmq-pedidos
+```
