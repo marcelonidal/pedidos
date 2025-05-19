@@ -143,12 +143,12 @@ Com todos os serviços prontos, você pode subir o sistema completo com:
 docker-compose up --build
 ```
 
-## Parar containers
+### Parar containers
 ```bash
 docker stop postgres-pedidos mongo-pedidos rabbitmq-pedidos
 ```
 
-## Remover containers
+### Remover containers
 ```bash
 docker rm postgres-pedidos mongo-pedidos rabbitmq-pedidos
 ```
