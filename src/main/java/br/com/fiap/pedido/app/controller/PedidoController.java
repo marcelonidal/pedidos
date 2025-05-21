@@ -5,6 +5,7 @@ import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
 import br.com.fiap.pedido.core.domain.usecase.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +27,15 @@ public class PedidoController {
 
     private final PedidoService service;
 
-    @Operation(summary = "Cria um novo pedido")
+    @Operation(summary = "Cria um novo pedido",parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponse(responseCode = "200", description = "Pedido criado com sucesso")
     @ApiResponse(responseCode = "400", description = "Requisição inválida")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
@@ -35,7 +44,15 @@ public class PedidoController {
         return ResponseEntity.ok(service.criarPedido(dto));
     }
 
-    @Operation(summary = "Busca um pedido pelo ID")
+    @Operation(summary = "Busca um pedido pelo ID", parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponse(responseCode = "200", description = "Pedido encontrado")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
@@ -44,7 +61,15 @@ public class PedidoController {
         return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    @Operation(summary = "Lista todos os pedidos")
+    @Operation(summary = "Lista todos os pedidos", parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponse(responseCode = "200", description = "Lista de pedidos retornada com sucesso")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     @GetMapping
@@ -53,7 +78,15 @@ public class PedidoController {
     }
 
     @GetMapping("/paginado")
-    @Operation(summary = "Listar pedidos paginados", description = "Retorna uma lista paginada de pedidos cadastrados")
+    @Operation(summary = "Listar pedidos paginados", description = "Retorna uma lista paginada de pedidos cadastrados", parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de pedidos paginada retornada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida"),
@@ -64,7 +97,15 @@ public class PedidoController {
         return ResponseEntity.ok(service.listarPaginado(pageable));
     }
 
-    @Operation(summary = "Atualiza o status de um pedido")
+    @Operation(summary = "Atualiza o status de um pedido", parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponse(responseCode = "204", description = "Status atualizado com sucesso")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     @ApiResponse(responseCode = "400", description = "Status inválido")
@@ -87,7 +128,15 @@ public class PedidoController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Cancela um pedido existente")
+    @Operation(summary = "Cancela um pedido existente", parameters = {
+            @Parameter(
+                    name = "X-Internal-Call",
+                    in = ParameterIn.HEADER,
+                    required = true,
+                    example = "internal-secret",
+                    description = "Header interno obrigatório entre microsserviços"
+            )
+    })
     @ApiResponse(responseCode = "204", description = "Pedido cancelado com sucesso")
     @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
     @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
