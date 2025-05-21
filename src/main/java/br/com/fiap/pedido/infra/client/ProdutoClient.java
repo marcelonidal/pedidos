@@ -4,6 +4,7 @@ import br.com.fiap.pedido.app.dto.pedido.ItemPedidoDTO;
 import br.com.fiap.pedido.app.dto.produto.ProdutoResponseDTO;
 import br.com.fiap.pedido.core.domain.exception.ProdutoNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,13 +20,16 @@ public class ProdutoClient {
 
     private final RestTemplate restTemplate;
 
+    @Value("${hosts.produto}")
+    private String hostProduto;
+
     @Autowired
     public ProdutoClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     public ProdutoResponseDTO buscarProduto(UUID produtoId) {
-        String url = "http://localhost:8084/produtos/" + produtoId;
+        String url = "http://" + hostProduto + "/produtos/" + produtoId;
 
         try {
             return restTemplate.getForObject(url, ProdutoResponseDTO.class);

@@ -119,7 +119,6 @@ class PedidoControllerIT {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 List.of(new ItemPedidoDTO(PRODUTO_ID_FIXO, 2, new BigDecimal("25.00"))),
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 
@@ -149,7 +148,6 @@ class PedidoControllerIT {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 List.of(new ItemPedidoDTO(PRODUTO_ID_FIXO, 1, new BigDecimal("25.00"))),
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 
@@ -174,7 +172,6 @@ class PedidoControllerIT {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 List.of(new ItemPedidoDTO(PRODUTO_ID_FIXO, 1, new BigDecimal("33.00"))),
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 
@@ -195,7 +192,6 @@ class PedidoControllerIT {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 List.of(new ItemPedidoDTO(PRODUTO_ID_FIXO, 1, new BigDecimal("45.00"))),
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 

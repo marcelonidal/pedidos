@@ -61,7 +61,6 @@ class PedidoControllerTest {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 itens,
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 

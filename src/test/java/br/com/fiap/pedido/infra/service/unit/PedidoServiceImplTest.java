@@ -76,7 +76,6 @@ class PedidoServiceImplTest {
         PedidoRequestDTO dto = new PedidoRequestDTO(
                 GeradorUtil.gerarCpfValido(),
                 itens,
-                UUID.randomUUID(),
                 GeradorUtil.gerarNumeroCartaoValido()
         );
 
@@ -236,7 +235,7 @@ class PedidoServiceImplTest {
         List<PedidoResponseDTO> result = service.listarTodos();
 
         assertEquals(1, result.size());
-        PedidoResponseDTO primeiro = result.get(0);
+        PedidoResponseDTO primeiro = result.getFirst();
         assertEquals(pedidoId, primeiro.id());
         assertEquals(StatusPagamento.AGUARDANDO, primeiro.pagamento().status());
 

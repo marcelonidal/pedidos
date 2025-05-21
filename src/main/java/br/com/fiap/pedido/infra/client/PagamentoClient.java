@@ -4,6 +4,7 @@ import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 import br.com.fiap.pedido.app.dto.pagamento.PagamentoRequestDTO;
 import br.com.fiap.pedido.core.domain.exception.PagamentoException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,13 +19,16 @@ public class PagamentoClient {
 
     private final RestTemplate restTemplate;
 
+    @Value("${hosts.pagamento}")
+    private String hostPagamento;
+
     @Autowired
     public PagamentoClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     public PagamentoDTO solicitarPagamento(PagamentoRequestDTO dto) {
-        String url = "http://localhost:8081/pagamentos/";
+        String url = "http://" + hostPagamento + "/pagamentos";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,7 +44,7 @@ public class PagamentoClient {
     }
 
     public PagamentoDTO consultarStatus(UUID pedidoId) {
-        String url = "http://localhost:8081/pagamentos/pedido/" + pedidoId;
+        String url = "http://" + hostPagamento + "/pagamentos/" + pedidoId;
 
         try {
             return restTemplate.getForObject(url, PagamentoDTO.class);

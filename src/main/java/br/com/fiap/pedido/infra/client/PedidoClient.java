@@ -18,7 +18,7 @@ public class PedidoClient {
     }
 
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
-        String url = "http://localhost:8080/pedido/internal/api/v1";
+        String url = "http://localhost:8080/pedido/internal/api/v1/";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

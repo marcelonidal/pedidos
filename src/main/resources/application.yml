@@ -37,4 +37,10 @@ logging:
   level:
     root: OFF
     org.springframework.web: OFF
-    br.com.fiap.pedido: OFF
+    br.com.fiap.pedido: INFO
+
+hosts:
+  pagamento: ${HOST_PAGAMENTO:localhost:8081}
+  estoque: ${HOST_ESTOQUE:localhost:8082}
+  cliente: ${HOST_CLIENTE:localhost:8083}
+  produto: ${HOST_PRODUTO:localhost:8084}
