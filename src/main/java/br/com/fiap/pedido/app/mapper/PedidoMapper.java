@@ -21,11 +21,11 @@ public class PedidoMapper {
     public Pedido toModel(PedidoRequestDTO dto) {
         Pedido pedido = Pedido.builder()
                 .id(null)
-                .clienteId(dto.clienteId())
+                .clienteCpf(dto.clienteCpf())
                 .dataCriacao(LocalDateTime.now())
                 .status(PedidoStatus.CRIADO)
                 .valorTotal(calcularTotal(dto))
-                .idPagamento(dto.idPagamento())
+                .idCartao(dto.idCartao())
                 .itens(toItens(dto.itens()))
                 .build();
 
@@ -63,7 +63,7 @@ public class PedidoMapper {
 
         return new PedidoResponseDTO(
                 pedido.getId(),
-                pedido.getClienteId(),
+                pedido.getClienteCpf(),
                 pedido.getDataCriacao(),
                 pedido.getStatus().name(),
                 pedido.getValorTotal(),

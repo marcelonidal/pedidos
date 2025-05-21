@@ -1,10 +1,12 @@
 package br.com.fiap.pedido.infra.service;
 
 import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
+import br.com.fiap.pedido.app.dto.pagamento.PagamentoRequestDTO;
 import br.com.fiap.pedido.app.dto.pedido.ItemPedidoDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoRequestDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoResponseMongoDTO;
+import br.com.fiap.pedido.app.dto.produto.ProdutoResponseDTO;
 import br.com.fiap.pedido.app.event.PedidoEventPublisher;
 import br.com.fiap.pedido.app.mapper.PedidoMapper;
 import br.com.fiap.pedido.app.mapper.PedidoMongoMapper;
@@ -24,10 +26,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,20 +46,23 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
-        clienteClient.validarCliente(dto.clienteId());
-        produtoClient.validarProdutos(dto.itens());
+        clienteClient.validarCliente(dto.clienteCpf());
+        Map<UUID, ProdutoResponseDTO> produtos = produtoClient.buscarProdutos(dto.itens());
         estoqueClient.abaterEstoque(dto.itens());
 
         Pedido pedido = pedidoMapper.toModel(dto);
+        List<ItemPedido> itens = mapearItens(dto.itens(), produtos, pedido);
+        pedido.setItens(itens);
+        pedido.setValorTotal(calcularTotal(itens));
         Pedido salvo = repository.save(pedido);
 
-        // Status de pagamento inicial
-        PagamentoDTO pagamento = new PagamentoDTO(
-                dto.idPagamento(),
-                StatusPagamento.AGUARDANDO,
-                null,
-                null
+        // Dispara solicitacao de pagamento
+        PagamentoRequestDTO pagamentoRequest = new PagamentoRequestDTO(
+                salvo.getId(),
+                dto.idCartao(),
+                salvo.getValorTotal()
         );
+        PagamentoDTO pagamento = pagamentoClient.solicitarPagamento(pagamentoRequest);
 
         // Monta o DTO completo de resposta
         PedidoResponseDTO response = pedidoMapper.toResponse(salvo, pagamento);
@@ -66,8 +70,15 @@ public class PedidoServiceImpl implements PedidoService {
         // Publica o evento com base no próprio response
         eventPublisher.publicarPedidoCriado(response);
 
-        // Atualiza o status para ENVIADO após publicação
-        salvo.setStatus(PedidoStatus.ENVIADO);
+        // Atualiza o status após publicação
+        PedidoStatus status;
+        if (pagamento.status() == StatusPagamento.AGUARDANDO) {
+            status = PedidoStatus.ENVIADO; // foi enviado pra fila
+        } else {
+            status = mapearStatusPagamentoParaPedido(pagamento.status());
+        }
+        salvo.setStatus(status);
+
         repository.save(salvo);
 
         return pedidoMapper.toResponse(salvo, pagamento);
@@ -78,23 +89,24 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = repository.buscarItensPorId(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException("ID " + id + " não encontrada"));
 
-        PagamentoDTO pagamento = pagamentoClient.consultarStatus(pedido.getIdPagamento());
+        PagamentoDTO pagamento = pagamentoClient.consultarStatus(pedido.getId());
 
-        if (pagamento != null && pagamento.statusPagamento() != null) {
+        if (pagamento != null && pagamento.status() != null) {
             PedidoStatus statusAtual = pedido.getStatus();
 
             if (statusAtual != PedidoStatus.CANCELADO && statusAtual != PedidoStatus.REPROVADO) {
-                PedidoStatus statusPagamento = mapearStatusPagamentoParaPedido(pagamento.statusPagamento());
+                PedidoStatus statusPagamento = mapearStatusPagamentoParaPedido(pagamento.status());
 
                 if (!statusAtual.equals(statusPagamento)) {
                     pedido.setStatus(statusPagamento);
 
                     // Se o pagamento foi confirmado e ainda nao tem data registrada, seta agora
-                    if (statusPagamento == PedidoStatus.PAGO && pagamento.dataPagamento() == null) {
+                    if (statusPagamento == PedidoStatus.PAGO && pagamento.dataAprovacao() == null) {
                         pagamento = new PagamentoDTO(
-                                pagamento.id(),
-                                pagamento.statusPagamento(),
-                                pagamento.metodoPagamento(),
+                                pedido.getId(),
+                                pagamento.idCartao(),
+                                pagamento.valor(),
+                                pagamento.status(),
                                 LocalDateTime.now()
                         );
                     }
@@ -116,9 +128,10 @@ public class PedidoServiceImpl implements PedidoService {
                 .stream()
                 .map(p -> {
                     PagamentoDTO pagamento = new PagamentoDTO(
-                            p.getIdPagamento(),
+                            p.getId(),
+                            p.getIdCartao(),
+                            p.getValorTotal(),
                             StatusPagamento.AGUARDANDO,
-                            null,
                             null
                     );
                     return pedidoMapper.toResponse(p, pagamento);
@@ -131,9 +144,10 @@ public class PedidoServiceImpl implements PedidoService {
         return repository.findAll(pageable)
                 .map(p -> {
                     PagamentoDTO pagamento = new PagamentoDTO(
-                            p.getIdPagamento(),
+                            p.getId(),
+                            p.getIdCartao(),
+                            p.getValorTotal(),
                             StatusPagamento.AGUARDANDO,
-                            null,
                             null
                     );
                     return pedidoMapper.toResponse(p, pagamento);
@@ -159,8 +173,8 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     private void compararAlteracoes(Pedido antigo, PedidoResponseDTO novo) {
-        if (novo.clienteId() != null && !novo.clienteId().equals(antigo.getClienteId())) {
-            antigo.setClienteId(novo.clienteId());
+        if (novo.clienteCpf() != null && !novo.clienteCpf().equals(antigo.getClienteCpf())) {
+            antigo.setClienteCpf(novo.clienteCpf());
         }
 
         if (novo.dataCriacao() != null && !novo.dataCriacao().equals(antigo.getDataCriacao())) {
@@ -176,12 +190,15 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
         if (novo.itens() != null && !equalsItens(novo.itens(), antigo.getItens())) {
-            antigo.setItens(mapearItens(novo.itens(), antigo));
+            Map<UUID, ProdutoResponseDTO> produtos = produtoClient.buscarProdutos(novo.itens());
+            List<ItemPedido> novosItens = mapearItens(novo.itens(), produtos, antigo);
+            antigo.setItens(novosItens);
+            antigo.setValorTotal(calcularTotal(novosItens));
         }
 
-        if (novo.pagamento() != null && novo.pagamento().id() != null &&
-                !novo.pagamento().id().equals(antigo.getIdPagamento())) {
-            antigo.setIdPagamento(novo.pagamento().id());
+        if (novo.pagamento() != null && novo.pagamento().idCartao() != null &&
+                !novo.pagamento().idCartao().equals(antigo.getIdCartao())) {
+            antigo.setIdCartao(novo.pagamento().idCartao());
         }
     }
 
@@ -195,22 +212,24 @@ public class PedidoServiceImpl implements PedidoService {
 
             if (!Objects.equals(dto.produtoId(), entity.getProdutoId())) return false;
             if (dto.quantidade() != entity.getQuantidade()) return false;
-            if (dto.precoUnitario() == null || entity.getPrecoUnitario() == null) return false;
-            if (dto.precoUnitario().compareTo(entity.getPrecoUnitario()) != 0) return false;
         }
 
         return true;
     }
 
-    private List<ItemPedido> mapearItens(List<ItemPedidoDTO> itensDTO, Pedido pedidoPai) {
+    private List<ItemPedido> mapearItens(List<ItemPedidoDTO> itensDTO, Map<UUID, ProdutoResponseDTO> produtos, Pedido pedidoPai) {
         return itensDTO.stream()
-                .map(dto -> ItemPedido.builder()
-                        .produtoId(dto.produtoId())
-                        .quantidade(dto.quantidade())
-                        .precoUnitario(dto.precoUnitario())
-                        .pedido(pedidoPai)
-                        .build())
-                .toList();
+                .map(dto -> {
+                    ProdutoResponseDTO produto = produtos.get(dto.produtoId());
+
+                    return ItemPedido.builder()
+                            .produtoId(dto.produtoId())
+                            .quantidade(dto.quantidade())
+                            .precoUnitario(produto.preco())
+                            .pedido(pedidoPai)
+                            .build();
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private PedidoStatus mapearStatusPagamentoParaPedido(StatusPagamento statusPagamento) {
@@ -219,6 +238,12 @@ public class PedidoServiceImpl implements PedidoService {
             case APROVADO -> PedidoStatus.PAGO;
             case RECUSADO -> PedidoStatus.REPROVADO;
         };
+    }
+
+    private BigDecimal calcularTotal(List<ItemPedido> itens) {
+        return itens.stream()
+                .map(i -> i.getPrecoUnitario().multiply(BigDecimal.valueOf(i.getQuantidade())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public record PedidoResponseDTO(
         UUID id,
-        UUID clienteId,
+        String clienteCpf,
         LocalDateTime dataCriacao,
         String status,
         BigDecimal valorTotal,

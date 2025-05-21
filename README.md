@@ -59,22 +59,22 @@ Você pode testar todos os endpoints diretamente pela interface web.
 
 ### Criar rede Docker
 ```bash
-docker network create network-pedidos
+docker network create toystorerede
 ```
 
 ### Subir PostgreSQL
 ```bash
-docker run -d --name postgres-pedidos --network network-pedidos -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=pedidos -p 5432:5432 postgres:15
+docker run -d --name postgres-toy-store --network toystorerede -e DB_HOST=postgres-toy-store -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres
 ```
 
 ### Subir MongoDB
 ```bash
-docker run -d --name mongo-pedidos --network network-pedidos -p 27017:27017 mongo:6
+docker run -d --name mongo-toy-store --network toystorerede -e MONGO_HOST=mongo-toy-store -p 27017:27017 mongo
 ```
 
 ### Subir RabbitMQ
 ```bash
-docker run -d --name rabbitmq-pedidos --network network-pedidos -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_USER=guest -e RABBITMQ_DEFAULT_PASS=guest rabbitmq:3-management
+docker run -d --name rabbitmq-toy-store --network toystorerede -e RABBIT_HOST=rabbitmq-toy-store -p 5672:5672 -p 15672:15672 rabbitmq
 ```
 Acesse o painel de administração em: http://localhost:15672
 Usuário: guest
@@ -116,10 +116,10 @@ Parar visualizar o relatório necessário abrir via real path ou script:<br>
 
 ### Validar quem está na rede do docker
 ```bash
-docker network inspect network-pedidos
+docker network inspect toystorerede
 ```
 
-### Criar o container da aplicação
+### Criar o imagem da aplicação
 
 ```bash
 docker build -t pedido-service .
@@ -128,13 +128,13 @@ docker build -t pedido-service .
 ### Executar container
 
 ```bash
-docker run -p 8080:8080 --network network-pedidos pedido-service
+docker run -p 8080:8080 --network toystorerede pedido-service
 ```
 
 ### Executar o projeto completo manualmente:
 
 ```bash
-docker run -p 8080:8080 --name pedido-service --network network-pedidos -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-pedidos:5432/pedidos -e SPRING_DATASOURCE_USERNAME=postgres -e SPRING_DATASOURCE_PASSWORD=postgres -e SPRING_DATA_MONGODB_URI=mongodb://mongo-pedidos:27017/pedidos -e SPRING_RABBITMQ_HOST=rabbitmq-pedidos pedido-service
+docker run -d --name pedido-service -p 8080:8080 --network toystorerede -e DB_HOST=postgres-toy-store -e MONGO_HOST=mongo-toy-store -e RABBIT_HOST=rabbitmq-toy-store pedido-service
 ```
 
 ### Executar o projeto via docker compose:
@@ -145,10 +145,44 @@ docker-compose up --build
 
 ### Parar containers
 ```bash
-docker stop postgres-pedidos mongo-pedidos rabbitmq-pedidos
+docker stop postgres-toy-store mongo-toy-store rabbitmq-toy-store
 ```
 
 ### Remover containers
 ```bash
-docker rm postgres-pedidos mongo-pedidos rabbitmq-pedidos
+docker rm postgres-toy-store mongo-toy-store rabbitmq-toy-store
+```
+
+---
+
+## Publicar no Docker Hub
+
+### Criar imagem
+
+```bash
+docker build -t pedido-service .
+```
+
+### Fazer Login
+
+```bash
+docker login
+```
+
+### Tagear imagem
+
+```bash
+docker tag pedido-service marcelonidal/pedido-service:latest
+```
+
+### Subir no DockerHub
+
+```bash
+docker push marcelonidal/pedido-service:latest
+```
+
+### Rodar do DockerHub
+
+```bash
+docker run -d --name pedido-service -p 8080:8080 --network toystorerede -e DB_HOST=postgres-toy-store -e MONGO_HOST=mongo-toy-store -e RABBIT_HOST=rabbitmq-toy-store marcelonidal/pedido-service:latest
 ```

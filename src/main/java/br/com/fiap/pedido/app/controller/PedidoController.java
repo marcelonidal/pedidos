@@ -75,7 +75,7 @@ public class PedidoController {
 
         PedidoResponseDTO dtoComIdNova = new PedidoResponseDTO(
                 id,
-                dto.clienteId(),
+                dto.clienteCpf(),
                 dto.dataCriacao(),
                 dto.status(),
                 dto.valorTotal(),

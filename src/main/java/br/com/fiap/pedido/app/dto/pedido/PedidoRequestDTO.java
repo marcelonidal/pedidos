@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 public record PedidoRequestDTO(
-        UUID clienteId,
+        String clienteCpf,
         List<ItemPedidoDTO> itens,
-        UUID idPagamento
+        UUID idPagamento,
+        String idCartao
 ) implements Serializable {}

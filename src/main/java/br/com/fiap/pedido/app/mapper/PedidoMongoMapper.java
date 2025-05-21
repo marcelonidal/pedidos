@@ -18,7 +18,7 @@ public class PedidoMongoMapper {
         return PedidoMongo.builder()
                 .id(UUID.randomUUID().toString())
                 .idPedido(dto.id())
-                .idCliente(dto.clienteId())
+                .clienteCpf(dto.clienteCpf())
                 .dataCriacao(dto.dataCriacao())
                 .status(PedidoStatus.valueOf(dto.status()))
                 .valorTotal(dto.valorTotal())
@@ -30,7 +30,7 @@ public class PedidoMongoMapper {
     public PedidoResponseMongoDTO toResponse(Pedido pedido, PagamentoDTO pagamento) {
         return new PedidoResponseMongoDTO(
                 pedido.getId(),
-                pedido.getClienteId(),
+                pedido.getClienteCpf(),
                 pedido.getDataCriacao(),
                 pedido.getStatus().name(),
                 pedido.getValorTotal(),
@@ -68,10 +68,11 @@ public class PedidoMongoMapper {
         if (dto == null) return null;
 
         return Pagamento.builder()
-                .id(dto.id())
-                .statusPagamento(dto.statusPagamento())
-                .metodoPagamento(dto.metodoPagamento())
-                .dataPagamento(dto.dataPagamento())
+                .idPedido(dto.idPedido())
+                .idCartao(dto.idCartao())
+                .valor(dto.valor())
+                .status(dto.status())
+                .dataAprovacao(dto.dataAprovacao())
                 .build();
     }
 

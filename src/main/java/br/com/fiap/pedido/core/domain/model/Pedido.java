@@ -22,12 +22,12 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    private UUID clienteId;
+    private String clienteCpf;
     private LocalDateTime dataCriacao;
     @Enumerated(EnumType.STRING)
     private PedidoStatus status;
     private BigDecimal valorTotal;
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itens;
-    private UUID idPagamento;
+    private String idCartao;
 }

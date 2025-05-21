@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public record PedidoResponseMongoDTO(
         UUID id,
-        UUID clienteId,
+        String clienteCpf,
         LocalDateTime dataCriacao,
         String status,
         BigDecimal valorTotal,

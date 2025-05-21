@@ -7,6 +7,7 @@ import br.com.fiap.pedido.app.dto.pedido.PedidoRequestDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
 import br.com.fiap.pedido.core.domain.model.StatusPagamento;
 import br.com.fiap.pedido.core.domain.usecase.PedidoService;
+import br.com.fiap.pedido.util.GeradorUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -52,30 +53,33 @@ class PedidoControllerTest {
 
     @Test
     void shouldCreatePedidoSuccessfully() throws Exception {
-        UUID clienteId = UUID.randomUUID();
-        UUID pagamentoId = UUID.randomUUID();
+        UUID pedidoId = UUID.randomUUID();
         UUID produtoId = UUID.randomUUID();
 
+        List<ItemPedidoDTO> itens = List.of(new ItemPedidoDTO(produtoId, 2, new BigDecimal("10.00")));
+
         PedidoRequestDTO dto = new PedidoRequestDTO(
-                clienteId,
-                List.of(new ItemPedidoDTO(produtoId, 2, new BigDecimal("10.00"))),
-                pagamentoId
+                GeradorUtil.gerarCpfValido(),
+                itens,
+                UUID.randomUUID(),
+                GeradorUtil.gerarNumeroCartaoValido()
         );
 
         PagamentoDTO pagamento = new PagamentoDTO(
-                pagamentoId,
+                pedidoId,
+                dto.idCartao(),
+                BigDecimal.valueOf(20),
                 StatusPagamento.AGUARDANDO,
-                "CARTAO_CREDITO",
                 LocalDateTime.now()
         );
 
         PedidoResponseDTO resposta = new PedidoResponseDTO(
-                UUID.randomUUID(),
-                clienteId,
+                pedidoId,
+                dto.clienteCpf(),
                 LocalDateTime.now(),
                 "CRIADO",
                 new BigDecimal("20.00"),
-                dto.itens(),
+                itens,
                 pagamento
         );
 
@@ -87,30 +91,27 @@ class PedidoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CRIADO"))
                 .andExpect(jsonPath("$.valorTotal").value(20.00))
-                .andExpect(jsonPath("$.pagamento.statusPagamento").value("AGUARDANDO"))
-                .andExpect(jsonPath("$.pagamento.metodoPagamento").value("CARTAO_CREDITO"));
+                .andExpect(jsonPath("$.pagamento.status").value("AGUARDANDO"));
     }
 
     @Test
     void shouldReturnPedidoById() throws Exception {
         UUID pedidoId = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
-        UUID pagamentoId = UUID.randomUUID();
+        UUID produtoId = UUID.randomUUID();
 
-        List<ItemPedidoDTO> itens = List.of(
-                new ItemPedidoDTO(UUID.randomUUID(), 1, new BigDecimal("50.00"))
-        );
+        List<ItemPedidoDTO> itens = List.of(new ItemPedidoDTO(produtoId, 1, new BigDecimal("50.00")));
 
         PagamentoDTO pagamento = new PagamentoDTO(
-                pagamentoId,
+                pedidoId,
+                GeradorUtil.gerarNumeroCartaoValido(),
+                BigDecimal.valueOf(30),
                 StatusPagamento.AGUARDANDO,
-                "CARTAO_CREDITO",
                 LocalDateTime.now()
         );
 
         PedidoResponseDTO resposta = new PedidoResponseDTO(
                 pedidoId,
-                clienteId,
+                GeradorUtil.gerarCpfValido(),
                 LocalDateTime.now(),
                 "CRIADO",
                 new BigDecimal("50.00"),
@@ -125,34 +126,30 @@ class PedidoControllerTest {
                 .andExpect(jsonPath("$.id").value(pedidoId.toString()))
                 .andExpect(jsonPath("$.status").value("CRIADO"))
                 .andExpect(jsonPath("$.valorTotal").value(50.00))
-                .andExpect(jsonPath("$.pagamento.statusPagamento").value("AGUARDANDO"))
-                .andExpect(jsonPath("$.pagamento.metodoPagamento").value("CARTAO_CREDITO"));
+                .andExpect(jsonPath("$.pagamento.status").value("AGUARDANDO"));
     }
 
     @Test
     void shouldListAllPedidos() throws Exception {
         UUID pedidoId = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
-        UUID pagamentoId = UUID.randomUUID();
         UUID produtoId = UUID.randomUUID();
 
-        List<ItemPedidoDTO> itens = List.of(
-                new ItemPedidoDTO(produtoId, 1, new BigDecimal("50.00"))
-        );
+        List<ItemPedidoDTO> itens = List.of(new ItemPedidoDTO(produtoId, 1, new BigDecimal("60.00")));
 
         PagamentoDTO pagamento = new PagamentoDTO(
-                pagamentoId,
+                pedidoId,
+                GeradorUtil.gerarNumeroCartaoValido(),
+                BigDecimal.valueOf(60),
                 StatusPagamento.AGUARDANDO,
-                "CARTAO_CREDITO",
-                LocalDateTime.now()
+                null
         );
 
         PedidoResponseDTO pedido = new PedidoResponseDTO(
                 pedidoId,
-                clienteId,
+                GeradorUtil.gerarCpfValido(),
                 LocalDateTime.now(),
                 "CRIADO",
-                new BigDecimal("50.00"),
+                new BigDecimal("60.00"),
                 itens,
                 pagamento
         );
@@ -163,9 +160,8 @@ class PedidoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(pedidoId.toString()))
                 .andExpect(jsonPath("$[0].status").value("CRIADO"))
-                .andExpect(jsonPath("$[0].valorTotal").value(50.00))
-                .andExpect(jsonPath("$[0].pagamento.statusPagamento").value("AGUARDANDO"))
-                .andExpect(jsonPath("$[0].pagamento.metodoPagamento").value("CARTAO_CREDITO"));
+                .andExpect(jsonPath("$[0].valorTotal").value(60.00))
+                .andExpect(jsonPath("$[0].pagamento.status").value("AGUARDANDO"));
     }
 
     @Test

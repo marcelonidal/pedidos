@@ -20,7 +20,7 @@ public class PedidoOrquestradorServiceImpl implements PedidoOrquestradorService 
     /* Cria o pedido no service, que publica o evento internamente */
     @Override
     public PedidoResponseDTO criarPedido(PedidoRequestDTO dto) {
-        log.info("Orquestrador: criando pedido para cliente {}", dto.clienteId());
+        log.info("Orquestrador: criando pedido para cliente {}", dto.clienteCpf());
         return pedidoClient.criarPedido(dto);
     }
 

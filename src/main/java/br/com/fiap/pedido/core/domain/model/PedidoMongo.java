@@ -19,7 +19,7 @@ public class PedidoMongo {
     private String id;
 
     private UUID idPedido;
-    private UUID idCliente;
+    private String clienteCpf;
     private LocalDateTime dataCriacao;
     private PedidoStatus status;
     private BigDecimal valorTotal;

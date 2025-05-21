@@ -23,18 +23,19 @@ public class EstoqueClient {
     }
 
     public void abaterEstoque(List<ItemPedidoDTO> itens) {
-        List<EstoqueRequestDTO> requisicao = itens.stream()
-                .map(item -> new EstoqueRequestDTO(item.produtoId(), item.quantidade()))
-                .toList();
+        for (ItemPedidoDTO item : itens) {
+            try {
+                String url = "http://localhost:8082/stock/api/produtos/" + item.produtoId();
+                EstoqueRequestDTO requestBody = new EstoqueRequestDTO(item.produtoId(), item.quantidade());
 
-        try {
-            HttpEntity<List<EstoqueRequestDTO>> request = new HttpEntity<>(requisicao);
-            restTemplate.postForEntity("http://localhost:8083/api/estoque/reservar", request, Void.class);
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
-                throw new EstoqueInsuficienteException("Estoque insuficiente para um ou mais produtos");
+                restTemplate.put(url, requestBody); //nao retorna resposta
+
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.UNPROCESSABLE_ENTITY) {
+                    throw new EstoqueInsuficienteException("Estoque insuficiente para o produto " + item.produtoId());
+                }
+                throw new RuntimeException("Erro ao reservar estoque: " + e.getMessage());
             }
-            throw new RuntimeException("Erro ao reservar estoque: " + e.getMessage());
         }
     }
 

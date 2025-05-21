@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Pagamento {
 
-    private UUID id;
-    private UUID pedidoId;
-    private StatusPagamento statusPagamento;
-    private String metodoPagamento;
-    private LocalDateTime dataPagamento;
+    private UUID idPedido;
+    private String idCartao;
+    private BigDecimal valor;
+    private StatusPagamento status;
+    private LocalDateTime dataAprovacao;
 }

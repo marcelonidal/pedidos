@@ -4,6 +4,7 @@ import br.com.fiap.pedido.app.dto.pagamento.PagamentoDTO;
 import br.com.fiap.pedido.app.dto.pedido.ItemPedidoDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoRequestDTO;
 import br.com.fiap.pedido.app.dto.pedido.PedidoResponseDTO;
+import br.com.fiap.pedido.app.dto.produto.ProdutoResponseDTO;
 import br.com.fiap.pedido.app.event.PedidoEventPublisher;
 import br.com.fiap.pedido.app.mapper.PedidoMapper;
 import br.com.fiap.pedido.app.mapper.PedidoMongoMapper;
@@ -17,15 +18,13 @@ import br.com.fiap.pedido.infra.client.PagamentoClient;
 import br.com.fiap.pedido.infra.client.ProdutoClient;
 import br.com.fiap.pedido.infra.repository.postgres.PedidoRepository;
 import br.com.fiap.pedido.infra.service.PedidoServiceImpl;
+import br.com.fiap.pedido.util.GeradorUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -67,38 +66,44 @@ class PedidoServiceImplTest {
 
     @Test
     void shouldCreatePedidoWithExpectedStatusAndTotal() {
-        UUID clienteId = UUID.randomUUID();
         UUID pedidoId = UUID.randomUUID();
         UUID produtoId = UUID.randomUUID();
 
         List<ItemPedidoDTO> itens = List.of(
-                new ItemPedidoDTO(produtoId, 2, new BigDecimal("50.00"))
+                new ItemPedidoDTO(produtoId, 2, BigDecimal.valueOf(50))
         );
 
-        PedidoRequestDTO dto = new PedidoRequestDTO(clienteId, itens, UUID.randomUUID());
+        PedidoRequestDTO dto = new PedidoRequestDTO(
+                GeradorUtil.gerarCpfValido(),
+                itens,
+                UUID.randomUUID(),
+                GeradorUtil.gerarNumeroCartaoValido()
+        );
 
         Pedido pedido = Pedido.builder()
                 .id(pedidoId)
-                .clienteId(clienteId)
+                .clienteCpf(dto.clienteCpf())
                 .dataCriacao(LocalDateTime.now())
                 .status(PedidoStatus.CRIADO)
-                .valorTotal(new BigDecimal("100.00"))
+                .valorTotal(BigDecimal.valueOf(100))
                 .itens(Collections.emptyList())
+                .idCartao(dto.idCartao())
                 .build();
 
         PagamentoDTO pagamento = new PagamentoDTO(
-                dto.idPagamento(),
+                pedido.getId(),
+                pedido.getIdCartao(),
+                BigDecimal.ZERO,
                 StatusPagamento.AGUARDANDO,
-                null,
                 null
         );
 
         PedidoResponseDTO responseMock = new PedidoResponseDTO(
                 pedidoId,
-                clienteId,
+                pedido.getClienteCpf(),
                 pedido.getDataCriacao(),
                 "CRIADO",
-                new BigDecimal("100.00"),
+                BigDecimal.valueOf(100),
                 itens,
                 pagamento
         );
@@ -107,71 +112,79 @@ class PedidoServiceImplTest {
         when(repository.save(pedido)).thenReturn(pedido);
         when(mapper.toResponse(pedido, pagamento)).thenReturn(responseMock);
 
-        doNothing().when(clienteClient).validarCliente(clienteId);
-        doNothing().when(produtoClient).validarProdutos(itens);
+        doNothing().when(clienteClient).validarCliente(pedido.getClienteCpf());
+
+        Map<UUID, ProdutoResponseDTO> produtosMock = Map.of(
+                produtoId, new ProdutoResponseDTO(
+                        produtoId,
+                        "Produto Teste",
+                        "Marca X",
+                        "Azul",
+                        "M",
+                        "Adulto",
+                        10,
+                        new BigDecimal("50.00"),
+                        "SKU-1234"
+                )
+        );
+        when(produtoClient.buscarProdutos(itens)).thenReturn(produtosMock);
         doNothing().when(estoqueClient).abaterEstoque(itens);
+        when(pagamentoClient.solicitarPagamento(any())).thenReturn(pagamento);
         doNothing().when(eventPublisher).publicarPedidoCriado(any());
 
         PedidoResponseDTO response = service.criarPedido(dto);
 
         assertNotNull(response);
         assertEquals("CRIADO", response.status());
-        assertEquals(new BigDecimal("100.00"), response.valorTotal());
-        assertEquals(StatusPagamento.AGUARDANDO, response.pagamento().statusPagamento());
+        assertEquals(BigDecimal.valueOf(100), response.valorTotal());
+        assertEquals(StatusPagamento.AGUARDANDO, response.pagamento().status());
 
-        verify(repository, times(2)).save(pedido); // validando os dois saves
+        verify(repository, times(2)).save(pedido);
         verify(eventPublisher).publicarPedidoCriado(any());
     }
 
     @Test
     void shouldReturnPedidoWhenIdExists() {
         UUID id = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
-        UUID pagamentoId = UUID.randomUUID();
-
-        // pagamento aprovado -> status do pedido sera PAGO
-        StatusPagamento statusPagamento = StatusPagamento.APROVADO;
-        PedidoStatus statusEsperado = PedidoStatus.PAGO;
-
-        PagamentoDTO pagamento = new PagamentoDTO(
-                pagamentoId,
-                statusPagamento,
-                "CARTAO_CREDITO",
-                LocalDateTime.now()
-        );
 
         Pedido pedido = Pedido.builder()
                 .id(id)
-                .clienteId(clienteId)
+                .clienteCpf(GeradorUtil.gerarCpfValido())
                 .dataCriacao(LocalDateTime.now())
-                .status(statusEsperado)
-                .valorTotal(new BigDecimal("100.00"))
-                .idPagamento(pagamentoId)
+                .status(PedidoStatus.CRIADO)
+                .valorTotal(BigDecimal.valueOf(200))
+                .idCartao(GeradorUtil.gerarNumeroCartaoValido())
                 .itens(Collections.emptyList())
                 .build();
 
+        PagamentoDTO pagamento = new PagamentoDTO(
+                pedido.getId(),
+                pedido.getIdCartao(),
+                BigDecimal.valueOf(200),
+                StatusPagamento.APROVADO,
+                LocalDateTime.now()
+        );
+
         PedidoResponseDTO responseMock = new PedidoResponseDTO(
-                id,
-                clienteId,
+                pedido.getId(),
+                pedido.getClienteCpf(),
                 pedido.getDataCriacao(),
-                statusEsperado.name(),
+                PedidoStatus.PAGO.name(),
                 pedido.getValorTotal(),
                 List.of(),
                 pagamento
         );
 
         when(repository.buscarItensPorId(id)).thenReturn(Optional.of(pedido));
-        when(pagamentoClient.consultarStatus(pagamentoId)).thenReturn(pagamento);
+        when(pagamentoClient.consultarStatus(pedido.getId())).thenReturn(pagamento);
+        when(repository.save(any())).thenReturn(pedido);
         when(mapper.toResponse(pedido, pagamento)).thenReturn(responseMock);
 
         PedidoResponseDTO response = service.buscarPorId(id);
 
         assertNotNull(response);
-        assertEquals(statusEsperado.name(), response.status());
-        assertEquals(statusPagamento, response.pagamento().statusPagamento());
-
-        verify(repository).buscarItensPorId(id);
-        verify(pagamentoClient).consultarStatus(pagamentoId);
+        assertEquals(PedidoStatus.PAGO.name(), response.status());
+        assertEquals(StatusPagamento.APROVADO, response.pagamento().status());
     }
 
     @Test
@@ -182,44 +195,38 @@ class PedidoServiceImplTest {
 
         assertThrows(PedidoNaoEncontradoException.class, () -> service.buscarPorId(id));
 
-        //valida se o metodo foi realmente chamado
         verify(repository).buscarItensPorId(id);
     }
 
     @Test
     void shouldReturnAllPedidos() {
         UUID pedidoId = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
-        UUID pagamentoId = UUID.randomUUID();
 
         Pedido pedido = Pedido.builder()
                 .id(pedidoId)
-                .clienteId(clienteId)
-                .idPagamento(pagamentoId) // <<< ESSENCIAL
+                .clienteCpf(GeradorUtil.gerarCpfValido())
                 .dataCriacao(LocalDateTime.now())
                 .status(PedidoStatus.CRIADO)
-                .valorTotal(new BigDecimal("50.00"))
+                .valorTotal(BigDecimal.valueOf(50))
+                .idCartao(GeradorUtil.gerarNumeroCartaoValido())
                 .itens(Collections.emptyList())
                 .build();
 
-        List<Pedido> pedidos = List.of(pedido);
-
-        List<ItemPedidoDTO> itens = List.of(); // Simulado ou vazio
-
         PagamentoDTO pagamento = new PagamentoDTO(
-                pagamentoId,
+                pedidoId,
+                pedido.getIdCartao(),
+                BigDecimal.valueOf(50),
                 StatusPagamento.AGUARDANDO,
-                null,
                 null
         );
 
         PedidoResponseDTO responseMock = new PedidoResponseDTO(
                 pedidoId,
-                clienteId,
+                pedido.getClienteCpf(),
                 pedido.getDataCriacao(),
-                pedido.getStatus().name(),
+                PedidoStatus.CRIADO.name(),
                 pedido.getValorTotal(),
-                List.of(), // ou os itens mockados
+                List.of(),
                 pagamento
         );
 
@@ -229,24 +236,23 @@ class PedidoServiceImplTest {
         List<PedidoResponseDTO> result = service.listarTodos();
 
         assertEquals(1, result.size());
-        assertEquals(pedidoId, result.getFirst().id());
-        assertEquals(StatusPagamento.AGUARDANDO, result.getFirst().pagamento().statusPagamento());
+        PedidoResponseDTO primeiro = result.get(0);
+        assertEquals(pedidoId, primeiro.id());
+        assertEquals(StatusPagamento.AGUARDANDO, primeiro.pagamento().status());
 
-        // valida se o metodo foi realmente chamado
-        when(repository.buscarItens()).thenReturn(List.of(pedido));
+        verify(repository).buscarItens();
     }
 
     @Test
     void shouldCancelPedidoById() {
         UUID id = UUID.randomUUID();
-        UUID clienteId = UUID.randomUUID();
 
         Pedido pedido = Pedido.builder()
                 .id(id)
-                .clienteId(clienteId)
+                .clienteCpf(GeradorUtil.gerarCpfValido())
                 .status(PedidoStatus.CRIADO)
                 .dataCriacao(LocalDateTime.now())
-                .valorTotal(new BigDecimal("150.00"))
+                .valorTotal(BigDecimal.valueOf(150))
                 .itens(Collections.emptyList())
                 .build();
 
@@ -255,8 +261,6 @@ class PedidoServiceImplTest {
         service.cancelarPedido(id);
 
         assertEquals(PedidoStatus.CANCELADO, pedido.getStatus());
-
-        // valida se o metodo foi realmente chamado
         verify(repository).findById(id);
         verify(repository).save(pedido);
     }

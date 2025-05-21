@@ -1,0 +1,91 @@
+O que foi feito — por módulo
+
+1. Estrutura e Clean Architecture
+
+Camadas bem separadas:
+
+app.controller → entrada REST
+
+core.domain → modelos e regras
+
+infra.client → integração externa (produto, cliente, estoque, pagamento)
+
+infra.repository → PostgreSQL e Mongo
+
+infra.queue → eventos RabbitMQ
+
+infra.config → segurança, Rabbit, Swagger, exceptions
+
+Comentário: Excelente separação. Clareza, escalabilidade e testabilidade garantidas.
+
+2. DTOs e records
+
+Todos os DTOs foram padronizados com record
+
+Separação clara entre RequestDTO, ResponseDTO, MongoDTO
+
+Cobertura de todos os fluxos: pedido, item, pagamento, produto, estoque
+
+Comentário: Moderno e direto. record reduz boilerplate e comunica a intenção (imutable DTO).
+
+3. Clients REST
+
+RestTemplate usado de forma leve e padronizada
+
+ProdutoClient, ClienteClient, EstoqueClient, PagamentoClient, PedidoClient
+
+Erros tratados com HttpClientErrorException e exceções customizadas
+
+Comentário: Bem encapsulado, com fallback simples e rastreável.
+
+4. Mensageria com RabbitMQ
+
+Exchange: pedido.exchange
+
+Filas: pedido.criado, pedido.atualizado
+
+Publicação feita no PedidoEventPublisher
+
+Consumo e persistência em PedidoConsumer
+
+Comentário: Uso maduro de eventos. Isolamento entre serviços e persistência assíncrona em Mongo muito bem feita.
+
+5. Banco de dados
+
+PostgreSQL (JPA) para dados relacionais (pedido, item)
+
+MongoDB para persistência de eventos e histórico (PedidoMongo)
+
+Flyway para versionamento de schema
+
+Comentário: Arquitetura híbrida moderna. Uso inteligente dos dois bancos.
+
+6. Segurança leve
+
+InternalEndpointFilter protege os endpoints internos com X-Internal-Call
+
+Evita exposição acidental de rotas internas
+
+Comentário: Boa solução para projetos com separação entre BFF e API interna. Simples, mas eficaz.
+
+7. Swagger/OpenAPI
+
+Usando springdoc-openapi
+
+Dividido em dois grupos: publico e interno
+
+Documentação clara para integradores
+
+Comentário: Excelente prática. Melhora a DX (Developer Experience) com dois ambientes de documentação.
+
+8. Testes e cobertura
+
+JUnit, Mockito, Jacoco configurado
+
+Surefire para unitários
+
+Failsafe para integrados
+
+jacoco:check e jacoco:report com profiles separados
+
+Comentário: Estrutura completa para pipeline de testes e CI/CD.

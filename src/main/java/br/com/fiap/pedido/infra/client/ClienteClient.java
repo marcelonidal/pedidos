@@ -19,14 +19,15 @@ public class ClienteClient {
         this.restTemplate = restTemplate;
     }
 
-    public void validarCliente(UUID clienteId) {
+    public void validarCliente(String clienteCpf) {
         try {
-            restTemplate.getForEntity("http://localhost:8081/api/clientes/" + clienteId, Void.class);
+            restTemplate.getForEntity("http://localhost:8083/customer/v1/cliente/" + clienteCpf, Void.class);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new ClienteNaoEncontradoException("Cliente com ID " + clienteId + " nao encontrado");
+                throw new ClienteNaoEncontradoException("Cliente com CPF " + clienteCpf + " nao encontrado");
             }
             throw new RuntimeException("Erro ao consultar cliente: " + e.getMessage());
         }
     }
+
 }

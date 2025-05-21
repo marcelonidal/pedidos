@@ -30,7 +30,7 @@ public class PedidoConsumer {
 
         PedidoResponseMongoDTO mongoDTO = new PedidoResponseMongoDTO(
                 dto.id(),
-                dto.clienteId(),
+                dto.clienteCpf(),
                 dto.dataCriacao(),
                 dto.status(),
                 dto.valorTotal(),
@@ -71,7 +71,7 @@ public class PedidoConsumer {
      * Atualiza os campos do documento Mongo com base no DTO recebido
      */
     private void atualizarCampos(PedidoMongo existente, PedidoResponseMongoDTO dto) {
-        existente.setIdCliente(dto.clienteId());
+        existente.setClienteCpf(dto.clienteCpf());
         existente.setDataCriacao(dto.dataCriacao());
         existente.setStatus(PedidoStatus.valueOf(dto.status()));
         existente.setValorTotal(dto.valorTotal());
