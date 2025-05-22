@@ -110,13 +110,26 @@ Parar visualizar o relatório necessário abrir via real path ou script:<br>
 - via bat no windows: start "" "target\site\jacoco\index.html"
 - run no arquivo abrir-relatorio.bat na raiz do projeto.
 
+#### Resultado:
+![Relatorio Jacoco](docs/teste_cobertura_2025-05-21.png)
+
 ---
 
 ## Docker
 
+### Validar qual container está rodando
+```bash
+docker ps
+```
+
 ### Validar quem está na rede do docker
 ```bash
 docker network inspect toystorerede
+```
+
+### Adionar container a network
+```bash
+docker network connect toystorerede app-toy-store-product
 ```
 
 ### Criar o imagem da aplicação
@@ -172,17 +185,40 @@ docker login
 ### Tagear imagem
 
 ```bash
-docker tag pedido-service marcelonidal/pedido-service:latest
+docker tag pedido-service marcelonidal/pedido-service:1.0
 ```
 
 ### Subir no DockerHub
 
 ```bash
-docker push marcelonidal/pedido-service:latest
+docker push marcelonidal/pedido-service:1.0
 ```
 
 ### Rodar do DockerHub
 
 ```bash
-docker run -d --name pedido-service -p 8080:8080 --network toystorerede -e DB_HOST=postgres-toy-store -e MONGO_HOST=mongo-toy-store -e RABBIT_HOST=rabbitmq-toy-store marcelonidal/pedido-service:latest
+docker run -d --name pedido-service -p 8080:8080 --network toystorerede -e DB_HOST=postgres-toy-store -e MONGO_HOST=mongo-toy-store -e RABBIT_HOST=rabbitmq-toy-store marcelonidal/pedido-service:1.0
 ```
+
+---
+
+## Pré Requisitos para criar um Pedido:
+
+1. Usar um cliente válido ou criar um novo;
+2. Criar um produto;
+3. Criar o estoque atrelando a id do produto;
+
+Observações:<br>
+- O valor do preço unitário utilizado para criar o pedido é irrelevante, pois será atualizado ao criar o pedido. Foi utilizado o mesmo DTO pra Request e Response;
+<br><br>
+- É necessário informar qual é o HOST do container do microserviço externo;
+
+### Regra dos containers:
+
+|  Nome container   |     Host interno      | Porta interna | Porta externa |
+|:-----------------:|:---------------------:|:-------------:|:-------------:|
+|  Pedido Service   |    pedido-service     |     8080      |     8080      |
+|  Cliente Service  | toystore-customer-app |     8080      |     8083      |
+|  Produto Service  | app-toy-store-product |     8080      |     8084      |
+|  Estoque Service  |  app-toy-store-stock  |     8080      |     8082      |
+| Pagamento Service |  toy-store-Pagamento  |     8080      |     8081      |
