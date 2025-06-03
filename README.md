@@ -111,7 +111,7 @@ Parar visualizar o relatório necessário abrir via real path ou script:<br>
 - run no arquivo abrir-relatorio.bat na raiz do projeto.
 
 #### Resultado:
-![Relatorio Jacoco](docs/teste_cobertura_2025-05-21.png)
+![Relatorio Jacoco](docs/teste_cobertura_2025-06-02.png)
 
 ---
 
