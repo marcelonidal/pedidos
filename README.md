@@ -207,6 +207,10 @@ docker run -d --name pedido-service -p 8080:8080 --network toystorerede -e DB_HO
 1. Usar um cliente válido ou criar um novo;
 2. Criar um produto;
 3. Criar o estoque atrelando a id do produto;
+4. Criar a base pedidos no PostgreSQL:
+```bash
+docker exec -it postgres-toy-store psql -U postgres -c "CREATE DATABASE pedidos;"
+```
 
 Observações:<br>
 - O valor do preço unitário utilizado para criar o pedido é irrelevante, pois será atualizado ao criar o pedido. Foi utilizado o mesmo DTO pra Request e Response;
